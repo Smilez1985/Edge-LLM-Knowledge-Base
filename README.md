@@ -1,2 +1,2 @@
 # Edge-LLM-Knowledge-Base
-Wissenquelle für Qsrant Docker im LLM-Conversion-Framework
+Wissenquelle für Qdrant Docker im LLM-Conversion-Framework
