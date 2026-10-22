@@ -14,9 +14,10 @@
 # scripts/zoo_sign_index.py (the signing key never reaches CI). Steps: MAINTAINERS.md.
 name: Validate contribution
 
+# Every pull request runs this check (it is the required check of the protected main branch); one that adds no pack
+# under contributions/ passes after a short look.
 on:
   pull_request:
-    paths: ["contributions/**"]
 
 permissions:
   contents: read
