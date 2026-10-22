@@ -1,0 +1,5 @@
+# Packs and the signed index are published byte for byte: index.json.sig covers the exact bytes of index.json, and
+# an index entry pins the size and sha256 of its pack. Git never converts their line endings.
+*.zip binary
+index.json -text
+index.json.sig -text

@@ -1,0 +1,82 @@
+# Copy of the framework's workflow template scripts/community_repo/validate-contribution.yml
+# (Smilez1985/LLM_Cross-Compiler_Framework). Two changes against the template: LCF_REF names a framework commit, and
+# the README.md of each contribution folder passes (it describes the folder and is not a pack).
+#
+# It checks every file a pull request adds under contributions/ with the framework at a pinned commit:
+#   - only pack files (.zip), each at most 5 MB;
+#   - `llm-cli zoo verify`: manifest and hashes, no links, no extra or binary files, the target validators
+#     (capabilities, every FROM pinned by digest, the shell deny-list, bash -n, no template placeholders), the
+#     recipe and knowledge schemas, an included author signature, and the privacy scrub over every file in the
+#     pack (no home folders, addresses, host or user names, and no key of the framework's secret table: a pack
+#     with a key is rejected). The repository's secret scan is not run on the zips: it skips binary files, so it
+#     would check nothing inside a pack.
+# A maintainer then reviews the pack, merges it, adds its entry to index.json and signs the index offline with
+# scripts/zoo_sign_index.py (the signing key never reaches CI). Steps: MAINTAINERS.md.
+name: Validate contribution
+
+on:
+  pull_request:
+    paths: ["contributions/**"]
+
+permissions:
+  contents: read
+
+env:
+  # The framework version whose `llm-cli zoo verify` checks the packs. 952a504193dd9e9ea6487c1199f3b7caa88cb7de is
+  # the first framework commit with the --no-deps install rule this workflow needs (its hash-pinned requirements
+  # install only with --no-deps). The maintainer moves it to a release tag once a release with the community zoo is
+  # published (later the newest one).
+  LCF_REF: 952a504193dd9e9ea6487c1199f3b7caa88cb7de
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Smilez1985/LLM_Cross-Compiler_Framework
+          ref: ${{ env.LCF_REF }}
+          path: .lcf
+          persist-credentials: false
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Install the framework
+        run: |
+          python -m pip install --require-hashes --no-deps -r .lcf/requirements.txt
+          python -m pip install --no-deps ./.lcf
+
+      - name: Changed files
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git diff --name-only --diff-filter=AMR "origin/${BASE_REF}...HEAD" -- contributions > changed.txt
+
+      - name: Check every added pack
+        run: |
+          status=0
+          while IFS= read -r file; do
+            case "$file" in
+              contributions/target/*.zip|contributions/recipe/*.zip|contributions/knowledge/*.zip)
+                if [ "$(stat -c %s "$file")" -gt 5000000 ]; then
+                  echo "::error file=$file::larger than 5 MB; packs carry scripts, recipes and text only"
+                  status=1
+                elif ! llm-cli zoo verify "$file"; then
+                  echo "::error file=$file::the pack was rejected (see the log above)"
+                  status=1
+                fi ;;
+              contributions/target/README.md|contributions/recipe/README.md|contributions/knowledge/README.md)
+                echo "::notice file=$file::the folder's description, not a pack; not checked" ;;
+              *)
+                echo "::error file=$file::only pack files (contributions/<kind>/*.zip) belong here"
+                status=1 ;;
+            esac
+          done < changed.txt
+          exit "$status"
