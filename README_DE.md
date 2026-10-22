@@ -44,8 +44,9 @@ führt), `revoked` (gesperrt). Details:
    `llmcf module create`
    ([Leitfaden für Modulentwickler](https://github.com/Smilez1985/LLM_Cross-Compiler_Framework/blob/main/docs/Module_Developer_Guide_DE.md)).
    Ein Target-Template ist der Ordner `targets/<ID>/`: `target.yml` mit seinem `capabilities:`-Block, das
-   Dockerfile, die Module (`build.sh` und die Modul-Skripte, die der Generator schreibt: source, config, convert und
-   target) und optionale Hilfsskripte. Teste es mit einem echten Build auf deiner Hardware.
+   Dockerfile, die vier Module `source_module.sh`, `config_module.sh`, `convert_module.sh` und `target_module.sh`
+   (jedes eine Stufe des Builds, jedes auch einzeln aufrufbar), `build.sh`, das sie in dieser Reihenfolge ausführt,
+   und optionale Hilfsskripte. Teste es mit einem echten Build auf deiner Hardware.
 2. **Exportier es als Pack.** **Tools > Community Hub öffnen > Exportieren...** oder
    `llmcf zoo export target <ID> --author "<Name>"` (ein Pseudonym genügt); für einen fertigen Build
    `llmcf zoo export recipe <Build-Ordner> --author "<Name>"`, für deine Wissensbasis

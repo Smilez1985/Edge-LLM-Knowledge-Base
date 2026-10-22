@@ -40,8 +40,8 @@ Details: [Community zoo](https://github.com/Smilez1985/LLM_Cross-Compiler_Framew
 1. **Make the template in the framework.** A target: **Tools > Create Hardware Module...** or `llmcf module create`
    ([Module Developer Guide](https://github.com/Smilez1985/LLM_Cross-Compiler_Framework/blob/main/docs/Module_Developer_Guide.md)).
    A target template is the folder `targets/<id>/`: `target.yml` with its `capabilities:` block, the Dockerfile, the
-   modules (`build.sh` and the module scripts the generator writes: source, config, convert and target) and optional
-   helper scripts. Test it with a real build on your hardware.
+   four modules `source_module.sh`, `config_module.sh`, `convert_module.sh` and `target_module.sh` (each one stage of
+   the build, also runnable on its own), `build.sh`, which runs them in this order, and optional helper scripts. Test it with a real build on your hardware.
 2. **Export it as a pack.** **Tools > Open Community Hub > Export...**, or
    `llmcf zoo export target <id> --author "<name>"` (a pseudonym is fine); for a finished build
    `llmcf zoo export recipe <build folder> --author "<name>"`, for your knowledge base
