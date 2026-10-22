@@ -59,11 +59,6 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened]
     branches: [main]
-  # Only for the pull request that brings this copy: main's old copy is not triggered by pull_request_target, so this
-  # pull request checks itself. The very next pull request removes this trigger again.
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches: [main]
 
 permissions:
   contents: read
